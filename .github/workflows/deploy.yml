@@ -35,7 +35,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "liyodevchat"
-          entrypoint: "www.js"
+          entrypoint: "bin/www.js"
           root: "/"
           
           

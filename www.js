@@ -23,31 +23,52 @@ var server = http.createServer(app);
 
 const io = require('socket.io')(server);
 
+// Almacenar usuarios conectados
+let connectedUsers = new Map();
+
 io.on('connection', (socket) => { 
-  socket.broadcast.emit('mensaje_chat', {
-    usuario: 'INFO',
-    mensaje: 'Se ha conectado un nuevo usuario'
+  console.log('Usuario conectado:', socket.id);
+
+  socket.on('user_join', (data) => {
+    // Guardar usuario en el mapa
+    connectedUsers.set(socket.id, data.usuario);
+    
+    // Notificar a todos sobre el nuevo usuario
+    socket.broadcast.emit('mensaje_chat', {
+      usuario: 'INFO',
+      mensaje: `${data.usuario} se ha unido a la sala`
+    });
+    
+    // Enviar lista actualizada de usuarios a todos
+    const usersList = Array.from(connectedUsers.values());
+    io.emit('users_list', usersList);
+    io.emit('num_clientes', connectedUsers.size);
   });
 
-  socket.emit('num_clientes', io.engine.clientsCount);
-
   socket.on('mensaje_chat', data => {
-    io.emit('mensaje_chat', data)
-  }) 
-
-  socket.on('num_clientes', data => {
-    io.emit('num_clientes', data)
-  }) 
-
+    io.emit('mensaje_chat', data);
+  });
 
   socket.on('disconnect', () => {
-    io.emit('num_clientes', io.engine.clientsCount);
-    io.emit('mensaje_chat', {
-      usuario: 'INFO',
-      mensaje: 'Se ha desconectado un usuario'
-    })
-  })
-})
+    const username = connectedUsers.get(socket.id);
+    if (username) {
+      connectedUsers.delete(socket.id);
+      
+      // Notificar desconexión
+      io.emit('mensaje_chat', {
+        usuario: 'INFO',
+        mensaje: `${username} ha abandonado la sala`
+      });
+      
+      // Enviar lista actualizada
+      const usersList = Array.from(connectedUsers.values());
+      io.emit('users_list', usersList);
+      io.emit('num_clientes', connectedUsers.size);
+    }
+    
+    console.log('Usuario desconectado:', socket.id);
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.

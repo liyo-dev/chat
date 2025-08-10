@@ -1,41 +1,233 @@
 extends layout
 
 block content
-  h1= title
-  h2#numClientes
-  ul#mensajes
-  div
-    label Nombre
-    input#inputUsuario(type="text")
-  div
-    label Mensaje
-    input#inputMensaje(type="text")
-  button#btnEnviar Enviar
+  // Página de entrada
+  .login-screen#loginScreen
+    .login-container
+      .window-title ☢️ SALA DE CHAT LIYODEV ☢️
+      .login-form
+        h2.neon-text ¡BIENVENIDO A LA SALA!
+        .input-group
+          label(for="usernameInput") INTRODUCE TU NICK:
+          input#usernameInput(type="text" maxlength="15" placeholder="Tu_Nick_Aqui")
+        .button-group
+          button#enterButton.retro-button ENTRAR A LA SALA
+      .retro-info
+        p.scroll-text 💀 CHAT LIYODEV 1995 STYLE 💀 CONECTANDO USUARIOS DESDE LA ERA DORADA DE INTERNET 💀
+
+  // Interfaz principal del chat (oculta inicialmente)
+  .main-interface#mainInterface(style="display: none;")
+    .window-title
+      span.title-text 💬 SALA DE CHAT LIYODEV - CONECTADO COMO: 
+      span#currentUser
+      button#exitButton.exit-button ✖ SALIR
+    
+    .chat-layout
+      // Panel izquierdo - Chat principal
+      .chat-panel
+        .messages-container
+          .messages-header
+            span 📡 MENSAJES EN VIVO
+            span#messageCount (0)
+          #messages.messages
+        
+        .input-container
+          .chat-input
+            input#messageInput(type="text" placeholder="Escribe tu mensaje..." maxlength="200")
+            button#sendButton ENVIAR
+      
+      // Panel derecho - Lista de usuarios y info
+      .sidebar
+        .users-container
+          .users-header 👥 USUARIOS CONECTADOS
+          #usersList.users-list
+        
+        .info-container
+          .info-header 📊 ESTADÍSTICAS
+          .stats
+            .stat-item
+              span.stat-label Usuarios:
+              span#userCount.stat-value 0
+            .stat-item
+              span.stat-label Mensajes:
+              span#msgCount.stat-value 0
+            .stat-item
+              span.stat-label Uptime:
+              span#uptime.stat-value 00:00
 
   script(src="/socket.io/socket.io.js") 
-  script. 
+  script.
+    let currentUsername = '';
+    let messageCount = 0;
+    let startTime = new Date();
+    let connectedUsers = new Set();
+    
     const socket = io();
-
-    const inputUSuario = document.getElementById('inputUsuario');
-    const inputMensaje = document.getElementById('inputMensaje');
-    const btnEnviar = document.getElementById('btnEnviar');
-    const mensajes = document.getElementById('mensajes');
-    const numClientes = document.getElementById('numClientes');
-
-    btnEnviar.addEventListener('click', ()=>{
-      socket.emit('mensaje_chat', {
-        usuario: inputUSuario.value,
-        mensaje: inputMensaje.value
-      })
-    })
-
-    socket.on('mensaje_chat', data => {
-      console.log(data);
-      const li = document.createElement('li');
-      li.innerText = `${data.usuario}: ${data.mensaje}`;
-      mensajes.append(li);
-    })
-
-    socket.on('num_clientes', data => {
-      numClientes.innerText = `Clientes conectados: ${data}`;
-    })
+    
+    // Elementos DOM
+    const loginScreen = document.getElementById('loginScreen');
+    const mainInterface = document.getElementById('mainInterface');
+    const usernameInput = document.getElementById('usernameInput');
+    const enterButton = document.getElementById('enterButton');
+    const exitButton = document.getElementById('exitButton');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messages = document.getElementById('messages');
+    const currentUserSpan = document.getElementById('currentUser');
+    const usersList = document.getElementById('usersList');
+    const userCount = document.getElementById('userCount');
+    const msgCount = document.getElementById('msgCount');
+    const messageCountSpan = document.getElementById('messageCount');
+    
+    // Función para entrar al chat
+    function enterChat() {
+      const username = usernameInput.value.trim();
+      if (username && username.length >= 2) {
+        currentUsername = username;
+        currentUserSpan.textContent = username;
+        loginScreen.style.display = 'none';
+        mainInterface.style.display = 'block';
+        messageInput.focus();
+        
+        // Enviar evento de conexión con nombre
+        socket.emit('user_join', { usuario: username });
+        
+        // Añadir el usuario actual a la lista inmediatamente
+        connectedUsers.add(username);
+        updateUsersList(Array.from(connectedUsers));
+        
+        updateUptime();
+        setInterval(updateUptime, 1000);
+      } else {
+        alert('El nombre debe tener al menos 2 caracteres');
+      }
+    }
+    
+    // Función para enviar mensaje
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (message && currentUsername) {
+        socket.emit('mensaje_chat', {
+          usuario: currentUsername,
+          mensaje: message
+        });
+        messageInput.value = '';
+      }
+    }
+    
+    // Función para añadir mensaje al chat
+    function addMessage(data, isSystem = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = isSystem ? 'message system' : 
+                             (data.usuario === currentUsername ? 'message sent' : 'message received');
+      
+      const timestamp = new Date().toLocaleTimeString('es-ES', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      if (isSystem) {
+        messageDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span> *** ${data.mensaje} ***`;
+      } else {
+        messageDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="username">&lt;${data.usuario}&gt;</span> ${data.mensaje}`;
+      }
+      
+      messages.appendChild(messageDiv);
+      messages.scrollTop = messages.scrollHeight;
+      
+      messageCount++;
+      msgCount.textContent = messageCount;
+      messageCountSpan.textContent = messageCount;
+    }
+    
+    // Función para actualizar lista de usuarios
+    function updateUsersList(users) {
+      usersList.innerHTML = '';
+      connectedUsers.clear();
+      
+      // Asegurar que el usuario actual esté en la lista
+      if (currentUsername && !users.includes(currentUsername)) {
+        users.unshift(currentUsername);
+      }
+      
+      users.forEach(user => {
+        connectedUsers.add(user);
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-item';
+        // Destacar el usuario actual
+        if (user === currentUsername) {
+          userDiv.innerHTML = `<span class="user-status">●</span> ${user} <span style="color: #FFFF00;">(tú)</span>`;
+        } else {
+          userDiv.innerHTML = `<span class="user-status">●</span> ${user}`;
+        }
+        usersList.appendChild(userDiv);
+      });
+      
+      userCount.textContent = users.length;
+    }
+    
+    // Función para salir del chat
+    function exitChat() {
+      if (confirm('¿Estás seguro de que quieres salir de la sala?')) {
+        // Desconectar del socket
+        socket.disconnect();
+        
+        // Limpiar datos
+        currentUsername = '';
+        messageCount = 0;
+        connectedUsers.clear();
+        messages.innerHTML = '';
+        usernameInput.value = '';
+        
+        // Volver a la pantalla de entrada
+        mainInterface.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        usernameInput.focus();
+        
+        // Reconectar socket para futuras conexiones
+        setTimeout(() => {
+          socket.connect();
+        }, 500);
+      }
+    }
+    
+    // Función para actualizar uptime
+    function updateUptime() {
+      const now = new Date();
+      const diff = Math.floor((now - startTime) / 1000);
+      const minutes = Math.floor(diff / 60);
+      const seconds = diff % 60;
+      document.getElementById('uptime').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Event listeners
+    enterButton.addEventListener('click', enterChat);
+    exitButton.addEventListener('click', exitChat);
+    sendButton.addEventListener('click', sendMessage);
+    
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') enterChat();
+    });
+    
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+    
+    // Socket events
+    socket.on('mensaje_chat', (data) => {
+      if (data.usuario === 'INFO') {
+        addMessage(data, true);
+      } else {
+        addMessage(data);
+      }
+    });
+    
+    socket.on('num_clientes', (count) => {
+      userCount.textContent = count;
+    });
+    
+    socket.on('users_list', (users) => {
+      updateUsersList(users);
+    });

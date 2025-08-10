@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index-vercel', { title: 'Chat LIYODEV' });
+  res.render('index', { title: 'Chat LIYODEV' });
 });
 
 module.exports = router;

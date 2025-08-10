@@ -39,5 +39,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// For Vercel, export the app
+// Export the app
 module.exports = app;

@@ -3,13 +3,25 @@
   "builds": [
     {
       "src": "www.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["views/**", "public/**", "routes/**", "app.js"]
+      }
     }
   ],
   "routes": [
     {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/www.js"
     }
-  ]
+  ],
+  "functions": {
+    "www.js": {
+      "maxDuration": 10
+    }
+  }
 }

@@ -2,9 +2,10 @@
   "name": "chat",
   "version": "0.0.0",
   "private": true,
+  "main": "index.js",
   "scripts": {
-    "start": "node ./www.js",
-    "dev": "nodemon ./www.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

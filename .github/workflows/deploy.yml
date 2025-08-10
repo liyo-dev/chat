@@ -35,7 +35,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "liyodevchat"
-          entrypoint: "./bin/www"
+          entrypoint: "bin/www"
           root: "/"
           
           

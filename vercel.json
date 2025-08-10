@@ -2,11 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "www.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["views/**", "public/**", "routes/**", "app.js"]
-      }
+      "src": "app-vercel.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -16,12 +13,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/www.js"
+      "dest": "/app-vercel.js"
     }
-  ],
-  "functions": {
-    "www.js": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }

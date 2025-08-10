@@ -207,13 +207,41 @@ block content
     exitButton.addEventListener('click', exitChat);
     sendButton.addEventListener('click', sendMessage);
     
+    // Mejorado para móvil - evitar zoom en inputs
+    usernameInput.addEventListener('focus', function() {
+      if (window.innerWidth < 768) {
+        document.body.style.zoom = '1';
+      }
+    });
+    
+    messageInput.addEventListener('focus', function() {
+      if (window.innerWidth < 768) {
+        document.body.style.zoom = '1';
+        // Scroll al input en móvil
+        setTimeout(() => {
+          this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    });
+    
     usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') enterChat();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        enterChat();
+      }
     });
     
     messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
     });
+    
+    // Optimización para touch en móvil
+    if ('ontouchstart' in window) {
+      document.body.classList.add('touch-device');
+    }
     
     // Socket events
     socket.on('mensaje_chat', (data) => {

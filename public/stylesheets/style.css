@@ -413,19 +413,236 @@ body::before {
 
 /* RESPONSIVE PARA PANTALLAS PEQUEÑAS */
 @media (max-width: 768px) {
-  .chat-layout {
-    flex-direction: column;
+  body {
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   
-  .sidebar {
-    flex-direction: row;
-    flex: none;
-    height: 200px;
+  /* Login móvil */
+  .login-screen {
+    padding: 20px;
+    min-height: 100vh;
   }
   
   .login-container {
-    width: 90%;
-    margin: 0 20px;
+    width: 95%;
+    min-width: 280px;
+    margin: 0 auto;
+    max-width: 400px;
+  }
+  
+  .welcome-title {
+    font-size: 1.8rem !important;
+    margin: 10px 0 !important;
+  }
+  
+  .terminal-text {
+    font-size: 0.8rem !important;
+    padding: 15px !important;
+  }
+  
+  .retro-input {
+    font-size: 1rem !important;
+    padding: 12px !important;
+    margin: 10px 0 !important;
+  }
+  
+  .retro-button {
+    font-size: 1rem !important;
+    padding: 12px 24px !important;
+    margin: 10px 5px !important;
+    min-width: 120px;
+  }
+  
+  /* Chat layout móvil */
+  .chat-layout {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .main-chat {
+    flex: 1;
+    order: 1;
+    min-height: 60vh;
+  }
+  
+  .sidebar {
+    flex: none;
+    order: 2;
+    height: 40vh;
+    flex-direction: column;
+    border-left: none;
+    border-top: 2px inset #c0c0c0;
+  }
+  
+  .users-container {
+    height: 50%;
+  }
+  
+  .input-container {
+    height: 50%;
+    padding: 10px;
+  }
+  
+  /* Chat messages móvil */
+  .chat-messages {
+    height: calc(100% - 60px);
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+  
+  .message-item {
+    margin-bottom: 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Header móvil */
+  .window-header {
+    font-size: 0.9rem !important;
+    padding: 8px !important;
+  }
+  
+  .window-controls {
+    display: none; /* Ocultar controles de ventana en móvil */
+  }
+  
+  /* Input form móvil */
+  .message-form {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  
+  .message-input {
+    font-size: 1rem !important;
+    padding: 10px !important;
+    min-height: 40px;
+  }
+  
+  .send-button {
+    font-size: 0.9rem !important;
+    padding: 10px 15px !important;
+    min-width: 60px;
+  }
+  
+  .exit-button {
+    font-size: 0.8rem !important;
+    padding: 8px 12px !important;
+    margin: 5px !important;
+  }
+  
+  /* Users list móvil */
+  .users-list {
+    font-size: 0.8rem;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  .user-item {
+    padding: 6px 10px;
+    border-bottom: 1px solid #808080;
+  }
+  
+  /* Scrolling text móvil */
+  .scrolling-text {
+    font-size: 0.7rem !important;
+    padding: 8px !important;
+  }
+}
+
+/* RESPONSIVE PARA PANTALLAS MUY PEQUEÑAS */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+  }
+  
+  .welcome-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .terminal-text {
+    font-size: 0.7rem !important;
+    padding: 10px !important;
+  }
+  
+  .retro-input {
+    font-size: 0.9rem !important;
+    padding: 10px !important;
+  }
+  
+  .retro-button {
+    font-size: 0.9rem !important;
+    padding: 10px 20px !important;
+    margin: 8px 3px !important;
+  }
+  
+  .chat-messages {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+  
+  .message-input {
+    font-size: 0.9rem !important;
+    padding: 8px !important;
+  }
+  
+  .send-button {
+    font-size: 0.8rem !important;
+    padding: 8px 12px !important;
+  }
+  
+  .sidebar {
+    height: 35vh;
+  }
+  
+  .main-chat {
+    min-height: 65vh;
+  }
+}
+
+/* OPTIMIZACIONES PARA TOUCH */
+.touch-device .retro-button {
+  min-height: 44px; /* Tamaño mínimo recomendado para touch */
+  min-width: 44px;
+}
+
+.touch-device .retro-input {
+  min-height: 44px;
+}
+
+.touch-device .send-button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Evitar zoom en inputs en iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .retro-input, .message-input {
+    font-size: 16px !important;
+  }
+}
+
+/* Mejoras para el scroll en móvil */
+@media (max-width: 768px) {
+  .chat-messages {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .users-list {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ocultar scrollbars en móvil para mejor experiencia */
+  .chat-messages::-webkit-scrollbar,
+  .users-list::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-thumb,
+  .users-list::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.5);
+    border-radius: 2px;
   }
 }
 

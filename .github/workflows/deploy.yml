@@ -35,7 +35,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "liyodevchat"
-          entrypoint: "www.js"
+          entrypoint: "bin/www.js"
           root: "/"
-          include: app.js, www.js, routes, views, public, package.json.
-          exclude: .git, node_modules
+          
+          
